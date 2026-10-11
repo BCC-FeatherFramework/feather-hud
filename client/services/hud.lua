@@ -146,13 +146,20 @@ CreateThread(function()
     end
 end)
 
--- Hide the strip while the pause menu is open; edge-triggered so it only
--- pushes an NUI update on actual state changes, not every frame.
+-- Hide the strip while the pause menu is open or a weapon is drawn (the
+-- game's weapon/ammo HUD occupies the same top-right corner); edge-triggered
+-- so it only pushes an NUI update on actual state changes, not every frame.
+local UNARMED = `WEAPON_UNARMED`
+
+local function isHoldingWeapon()
+    local _, weapon = GetCurrentPedWeapon(PlayerPedId(), true, 0, false)
+    return weapon ~= nil and weapon ~= 0 and weapon ~= UNARMED
+end
 
 CreateThread(function()
     while true do
         Wait(0)
-        local nowPaused = IsPauseMenuActive()
+        local nowPaused = IsPauseMenuActive() or isHoldingWeapon()
         if nowPaused ~= paused then
             paused = nowPaused
             pushState()
